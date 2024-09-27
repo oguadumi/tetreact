@@ -20,33 +20,20 @@ export default function HoldDisplay({ heldTetromino }) {
     );
   }
 
-  const { shape, type } = heldTetromino;
+  const { type } = heldTetromino;
 
   return (
     <div className="mr-4 p-2 h-32 border-2 border-gray-300 rounded">
       <h2 className="text-center font-bold mb-2">Hold</h2>
-
-      {/*  display image shape depending on which is held instead of creating a grid
-            switch to destop and checc the ai training vid
-            https://www.youtube.com/watch?v=pXTfgw9A08w
-            https://github.com/knagaitsev/tetris-ai
-      */}
-      {/* <div className="grid gap-px" style={{ gridTemplateColumns: `repeat(${shape[0].length}, 1fr)` }}>
-        {shape.map((row, y) =>
-          row.map((cell, x) => (
-            <div
-              key={`${y}-${x}`}
-              className="w-4 h-4"
-              style={{ backgroundColor: cell ? COLORS[type] : 'white' }}
-            />
-          ))
-        )}
-      </div> */}
+      
+      {/* Display the tetromino image */}
+      <div className="flex justify-center items-center h-full">
+        <img 
+          src={`/${type}_.png`} 
+          alt={`${type} Tetromino`} 
+          className="w-16 h-16 object-contain" 
+        />
+      </div>
     </div>
   );
 }
-
-
-
-// add shadow below where block is about to be placed
-// add the next block side panel

@@ -4,7 +4,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
 import HoldDisplay from './HoldDisplay';
-import { initializeGame, moveTetrominoDown, moveTetromino, rotateTetromino, hardDrop, holdTetromino } from '../lib/tetrisLogic';
+import { 
+  initializeGame, 
+  moveTetrominoDown, 
+  moveTetromino, 
+  rotateTetromino, 
+  hardDrop, 
+  holdTetromino,
+  calculateShadowPosition // Import shadow logic
+} from '../lib/tetrisLogic';
 
 export default function TetrisGame() {
   const [gameState, setGameState] = useState(initializeGame());
@@ -45,21 +53,20 @@ export default function TetrisGame() {
   }, [handleKeyPress]);
 
   useEffect(() => {
-    if (gameState.isGameOver) return;
-  
     const gameLoop = setInterval(() => {
       setGameState(prevState => moveTetrominoDown(prevState));
     }, 1000);
-  
+
     return () => clearInterval(gameLoop);
-  }, [gameState.isGameOver]);
-  
+  }, []);
+
+  const shadowY = calculateShadowPosition(gameState); // Calculate shadow position
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex">
         <HoldDisplay heldTetromino={gameState.heldTetromino} />
-        <GameBoard gameState={gameState} />
+        <GameBoard gameState={gameState} shadowY={shadowY} /> {/* Pass shadow position */}
       </div>
       <ScoreBoard score={gameState.score} />
 
