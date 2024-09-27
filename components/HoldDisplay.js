@@ -23,9 +23,15 @@ export default function HoldDisplay({ heldTetromino }) {
   const { shape, type } = heldTetromino;
 
   return (
-    <div className="mr-4 p-2 border-2 border-gray-300 rounded">
+    <div className="mr-4 p-2 h-32 border-2 border-gray-300 rounded">
       <h2 className="text-center font-bold mb-2">Hold</h2>
-      <div className="grid gap-px" style={{ gridTemplateColumns: `repeat(${shape[0].length}, 1fr)` }}>
+
+      {/*  display image shape depending on which is held instead of creating a grid
+            switch to destop and checc the ai training vid
+            https://www.youtube.com/watch?v=pXTfgw9A08w
+            https://github.com/knagaitsev/tetris-ai
+      */}
+      {/* <div className="grid gap-px" style={{ gridTemplateColumns: `repeat(${shape[0].length}, 1fr)` }}>
         {shape.map((row, y) =>
           row.map((cell, x) => (
             <div
@@ -35,7 +41,7 @@ export default function HoldDisplay({ heldTetromino }) {
             />
           ))
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
