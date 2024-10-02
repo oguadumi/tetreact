@@ -75,6 +75,12 @@ export default function TetrisGame() {
     return () => clearInterval(gameLoop);
   }, [aiEnabled]);
 
+  useEffect(() => {
+    if (aiEnabled) {
+      ai.current.train(1000); // Train the AI for 1000 episodes
+    }
+  }, [aiEnabled]);
+
   const shadowY = calculateShadowPosition(gameState);
   const nextTetrominoes = getNextTetrominoes(gameState);
 
