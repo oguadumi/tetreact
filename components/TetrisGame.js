@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
 import HoldDisplay from './HoldDisplay';
 import NextDisplay from './NextDisplay';
-import AIStats from './AIStats';
+import AITrainer from './AITrainer';
 import { 
   initializeGame, 
   moveTetrominoDown, 
@@ -16,17 +16,18 @@ import {
   calculateShadowPosition,
   getNextTetrominoes
 } from '../lib/tetrisLogic';
-import TetrisAI from '../lib/TetrisAI'; // Import TetrisAI
+import { AIPlayer } from '../lib/AIPlayer';
 
 export default function TetrisGame() {
   const [gameState, setGameState] = useState(initializeGame());
-  const [aiEnabled, setAiEnabled] = useState(false); // State to toggle AI
-  const [generation, setGeneration] = useState(0); // State for generation
-  const [mutationRate, setMutationRate] = useState(0.01); // State for mutation rate
-  const ai = useRef(new TetrisAI(gameState)); // Initialize AI with game state
+  const [aiPlayer, setAiPlayer] = useState(new AIPlayer(5, 4, 1, 1));
+  const [isAIPlaying, setIsAIPlaying] = useState(false);
+  const [generation, setGeneration] = useState(1);
+  const [bestScore, setBestScore] = useState(0);
+  const [showAITrainer, setShowAITrainer] = useState(false);
 
   const handleKeyPress = useCallback((event) => {
-    if (gameState.isGameOver) return;
+    if (gameState.isGameOver || isAIPlaying) return;
     switch (event.key) {
       case 'ArrowLeft':
         setGameState(prevState => moveTetromino(prevState, { x: -1, y: 0 }));
@@ -47,13 +48,29 @@ export default function TetrisGame() {
         setGameState(prevState => holdTetromino(prevState));
         break;
     }
-  }, [gameState.isGameOver]);
+  }, [gameState.isGameOver, isAIPlaying]);
 
-  const restartGame = () => {
-    const newGameState = initializeGame();
-    setGameState(newGameState);
-    ai.current.gameState = newGameState; // Reset AI's game state
-  };
+  const restartGame = useCallback(() => {
+    if (isAIPlaying) {
+      // Update AI fitness before restarting
+      aiPlayer.updateFitness(gameState.score, gameState.linesCleared);
+      
+      // Train AI here (simplified version)
+      aiPlayer.mutate(0.1); // 10% mutation rate
+      
+      // Update best score
+      if (gameState.score > bestScore) {
+        setBestScore(gameState.score);
+      }
+      
+      // Increment generation
+      setGeneration(prev => prev + 1);
+      
+      // Reset AI player for next game
+      aiPlayer.reset();
+    }
+    setGameState(initializeGame());
+  }, [isAIPlaying, gameState.score, gameState.linesCleared, aiPlayer, bestScore]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -64,42 +81,43 @@ export default function TetrisGame() {
 
   useEffect(() => {
     const gameLoop = setInterval(() => {
-      setGameState(prevState => {
-        if (aiEnabled) {
-          const bestMove = ai.current.findBestMove();
-          if (bestMove) {
-            const newState = applyAIMove(prevState, bestMove);
-            ai.current.gameState = newState; // Update AI's game state
-            return newState;
+      if (!gameState.isGameOver) {
+        if (isAIPlaying) {
+          const aiMove = aiPlayer.calculateBestMove(gameState);
+          if (aiMove) {
+            setGameState(prevState => {
+              let newState = prevState;
+              for (let i = 0; i < aiMove.rotation; i++) {
+                newState = rotateTetromino(newState);
+              }
+              newState = moveTetromino(newState, { x: aiMove.x - newState.currentPosition.x, y: 0 });
+              return hardDrop(newState);
+            });
           }
+        } else {
+          setGameState(prevState => moveTetrominoDown(prevState));
         }
-        return moveTetrominoDown(prevState);
-      });
-    }, 100);  //increase game speed
+      } else if (isAIPlaying) {
+        restartGame();
+      }
+    }, isAIPlaying ? 100 : 1000);
 
     return () => clearInterval(gameLoop);
-  }, [aiEnabled]);
+  }, [gameState, isAIPlaying, aiPlayer, restartGame]);
 
-  useEffect(() => {
-    if (aiEnabled) {
-      ai.current.train(1000, () => {
-        setGeneration(prev => prev + 1); // Increment generation
-        setMutationRate(prev => prev * 0.995); // Decay mutation rate
-        restartGame(); // Restart the game after each training episode
-      });
+  const toggleAIPlay = () => {
+    setIsAIPlaying(!isAIPlaying);
+    if (!isAIPlaying) {
+      restartGame();
     }
-  }, [aiEnabled]);
+  };
 
-  useEffect(() => {
-    if (aiEnabled && gameState.isGameOver) {
-      restartGame(); // Automatically restart the game when AI is enabled and game is over
-    }
-  }, [aiEnabled, gameState.isGameOver]);
+  const toggleAITrainer = () => {
+    setShowAITrainer(!showAITrainer);
+  };
 
   const shadowY = calculateShadowPosition(gameState);
   const nextTetrominoes = getNextTetrominoes(gameState);
-
-  console.log('Next Tetrominoes:', nextTetrominoes);
 
   return (
     <div className="flex flex-col items-center">
@@ -109,16 +127,27 @@ export default function TetrisGame() {
         <NextDisplay nextPieces={nextTetrominoes} />
       </div>
       <ScoreBoard score={gameState.score} />
-      <AIStats generation={generation} mutationRate={mutationRate} /> {/* Add AIStats component */}
+
+      <div className="mt-4">
+        <button
+          onClick={toggleAIPlay}
+          className="p-2 bg-green-500 text-white rounded mr-2"
+        >
+          {isAIPlaying ? "Disable AI" : "Enable AI"}
+        </button>
+        
+      </div>
 
       <button
-        onClick={() => setAiEnabled(!aiEnabled)}
-        className="mt-2 p-2 bg-green-500 text-white rounded"
+        onClick={toggleAITrainer}
+        className="mt-2 p-2 bg-purple-500 text-white rounded"
       >
-        {aiEnabled ? 'Disable AI' : 'Enable AI'}
+        {showAITrainer ? "Hide AI Trainer" : "Show AI Trainer"}
       </button>
 
-      {gameState.isGameOver && !aiEnabled && (
+      {showAITrainer && <AITrainer />}
+
+      {gameState.isGameOver && !isAIPlaying && (
         <div className="text-center mt-4">
           <h2 className="text-2xl font-bold text-red-600">Game Over!</h2>
           <button
@@ -131,13 +160,4 @@ export default function TetrisGame() {
       )}
     </div>
   );
-}
-
-function applyAIMove(gameState, move) {
-  let newState = gameState;
-  for (let i = 0; i < move.rotation; i++) {
-    newState = rotateTetromino(newState);
-  }
-  newState = moveTetromino(newState, { x: move.x, y: 0 });
-  return hardDrop(newState);
 }
