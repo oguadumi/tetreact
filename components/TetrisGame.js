@@ -5,6 +5,7 @@ import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
 import HoldDisplay from './HoldDisplay';
 import NextDisplay from './NextDisplay';
+import AIStats from './AIStats';
 import { 
   initializeGame, 
   moveTetrominoDown, 
@@ -20,6 +21,8 @@ import TetrisAI from '../lib/TetrisAI'; // Import TetrisAI
 export default function TetrisGame() {
   const [gameState, setGameState] = useState(initializeGame());
   const [aiEnabled, setAiEnabled] = useState(false); // State to toggle AI
+  const [generation, setGeneration] = useState(0); // State for generation
+  const [mutationRate, setMutationRate] = useState(0.01); // State for mutation rate
   const ai = useRef(new TetrisAI(gameState)); // Initialize AI with game state
 
   const handleKeyPress = useCallback((event) => {
@@ -47,7 +50,9 @@ export default function TetrisGame() {
   }, [gameState.isGameOver]);
 
   const restartGame = () => {
-    setGameState(initializeGame());
+    const newGameState = initializeGame();
+    setGameState(newGameState);
+    ai.current.gameState = newGameState; // Reset AI's game state
   };
 
   useEffect(() => {
@@ -70,16 +75,26 @@ export default function TetrisGame() {
         }
         return moveTetrominoDown(prevState);
       });
-    }, 1000);
+    }, 100);  //increase game speed
 
     return () => clearInterval(gameLoop);
   }, [aiEnabled]);
 
   useEffect(() => {
     if (aiEnabled) {
-      ai.current.train(1000); // Train the AI for 1000 episodes
+      ai.current.train(1000, () => {
+        setGeneration(prev => prev + 1); // Increment generation
+        setMutationRate(prev => prev * 0.995); // Decay mutation rate
+        restartGame(); // Restart the game after each training episode
+      });
     }
   }, [aiEnabled]);
+
+  useEffect(() => {
+    if (aiEnabled && gameState.isGameOver) {
+      restartGame(); // Automatically restart the game when AI is enabled and game is over
+    }
+  }, [aiEnabled, gameState.isGameOver]);
 
   const shadowY = calculateShadowPosition(gameState);
   const nextTetrominoes = getNextTetrominoes(gameState);
@@ -94,6 +109,7 @@ export default function TetrisGame() {
         <NextDisplay nextPieces={nextTetrominoes} />
       </div>
       <ScoreBoard score={gameState.score} />
+      <AIStats generation={generation} mutationRate={mutationRate} /> {/* Add AIStats component */}
 
       <button
         onClick={() => setAiEnabled(!aiEnabled)}
@@ -102,7 +118,7 @@ export default function TetrisGame() {
         {aiEnabled ? 'Disable AI' : 'Enable AI'}
       </button>
 
-      {gameState.isGameOver && (
+      {gameState.isGameOver && !aiEnabled && (
         <div className="text-center mt-4">
           <h2 className="text-2xl font-bold text-red-600">Game Over!</h2>
           <button
