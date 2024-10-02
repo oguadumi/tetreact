@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
 import HoldDisplay from './HoldDisplay';
+import NextDisplay from './NextDisplay'; // Import NextDisplay component
 import { 
   initializeGame, 
   moveTetrominoDown, 
@@ -11,7 +12,8 @@ import {
   rotateTetromino, 
   hardDrop, 
   holdTetromino,
-  calculateShadowPosition // Import shadow logic
+  calculateShadowPosition, // Import shadow logic
+  getNextTetrominoes // Import getNextTetrominoes function
 } from '../lib/tetrisLogic';
 
 export default function TetrisGame() {
@@ -61,12 +63,16 @@ export default function TetrisGame() {
   }, []);
 
   const shadowY = calculateShadowPosition(gameState); // Calculate shadow position
+  const nextTetrominoes = getNextTetrominoes(gameState); // Get next Tetrominoes
+
+  console.log('Next Tetrominoes:', nextTetrominoes); // Log next Tetrominoes
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex">
         <HoldDisplay heldTetromino={gameState.heldTetromino} />
         <GameBoard gameState={gameState} shadowY={shadowY} /> {/* Pass shadow position */}
+        <NextDisplay nextPieces={nextTetrominoes} /> {/* Display next Tetrominoes */}
       </div>
       <ScoreBoard score={gameState.score} />
 
