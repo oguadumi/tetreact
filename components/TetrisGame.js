@@ -6,6 +6,7 @@ import ScoreBoard from './ScoreBoard';
 import HoldDisplay from './HoldDisplay';
 import NextDisplay from './NextDisplay';
 import AITrainer from './AITrainer';
+import LinesCleared from './LinesCleared';
 import { 
   initializeGame, 
   moveTetrominoDown, 
@@ -87,11 +88,16 @@ export default function TetrisGame() {
           if (aiMove) {
             setGameState(prevState => {
               let newState = prevState;
-              for (let i = 0; i < aiMove.rotation; i++) {
-                newState = rotateTetromino(newState);
+              if (aiMove.hold) {
+                newState = holdTetromino(newState);
+              } else {
+                for (let i = 0; i < aiMove.rotation; i++) {
+                  newState = rotateTetromino(newState);
+                }
+                newState = moveTetromino(newState, { x: aiMove.x - newState.currentPosition.x, y: 0 });
+                newState = hardDrop(newState);
               }
-              newState = moveTetromino(newState, { x: aiMove.x - newState.currentPosition.x, y: 0 });
-              return hardDrop(newState);
+              return newState;
             });
           }
         } else {
@@ -127,6 +133,7 @@ export default function TetrisGame() {
         <NextDisplay nextPieces={nextTetrominoes} />
       </div>
       <ScoreBoard score={gameState.score} />
+      <LinesCleared linesCleared={gameState.linesCleared} />
 
       <div className="mt-4">
         <button

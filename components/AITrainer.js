@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AIPlayer } from '../lib/AIPlayer';
-import { initializeGame, moveTetrominoDown, moveTetromino, rotateTetromino, hardDrop } from '../lib/tetrisLogic';
+import { initializeGame, moveTetrominoDown, moveTetromino, rotateTetromino, hardDrop, holdTetromino } from '../lib/tetrisLogic';
 
 const POPULATION_SIZE = 100;
 const GENERATIONS = 1000;
@@ -64,11 +64,15 @@ export default function AITrainer() {
     while (!gameState.isGameOver) {
       const aiMove = ai.calculateBestMove(gameState);
       if (aiMove) {
-        for (let i = 0; i < aiMove.rotation; i++) {
-          gameState = rotateTetromino(gameState);
+        if (aiMove.hold) {
+          gameState = holdTetromino(gameState);
+        } else {
+          for (let i = 0; i < aiMove.rotation; i++) {
+            gameState = rotateTetromino(gameState);
+          }
+          gameState = moveTetromino(gameState, { x: aiMove.x - gameState.currentPosition.x, y: 0 });
+          gameState = hardDrop(gameState);
         }
-        gameState = moveTetromino(gameState, { x: aiMove.x - gameState.currentPosition.x, y: 0 });
-        gameState = hardDrop(gameState);
       } else {
         gameState = moveTetrominoDown(gameState);
       }
