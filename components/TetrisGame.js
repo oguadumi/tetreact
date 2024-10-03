@@ -128,26 +128,26 @@ export default function TetrisGame() {
   return (
     <div className="flex flex-col items-center">
       <div className="flex">
-        <HoldDisplay heldTetromino={gameState.heldTetromino} />
+        <div className="flex flex-col mr-4">
+          <HoldDisplay heldTetromino={gameState.heldTetromino} />
+          <div className="mt-4">
+            <ScoreBoard score={gameState.score} />
+            <LinesCleared linesCleared={gameState.linesCleared} />
+            <button
+              onClick={toggleAIPlay}
+              className="mt-4 p-2 bg-green-500 text-white rounded w-full"
+            >
+              {isAIPlaying ? "Disable AI" : "Enable AI"}
+            </button>
+          </div>
+        </div>
         <GameBoard gameState={gameState} shadowY={shadowY} />
         <NextDisplay nextPieces={nextTetrominoes} />
-      </div>
-      <ScoreBoard score={gameState.score} />
-      <LinesCleared linesCleared={gameState.linesCleared} />
-
-      <div className="mt-4">
-        <button
-          onClick={toggleAIPlay}
-          className="p-2 bg-green-500 text-white rounded mr-2"
-        >
-          {isAIPlaying ? "Disable AI" : "Enable AI"}
-        </button>
-        
       </div>
 
       <button
         onClick={toggleAITrainer}
-        className="mt-2 p-2 bg-purple-500 text-white rounded"
+        className="mt-4 p-2 bg-purple-500 text-white rounded"
       >
         {showAITrainer ? "Hide AI Trainer" : "Show AI Trainer"}
       </button>
