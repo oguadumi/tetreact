@@ -26,6 +26,12 @@ export default function TetrisGame() {
   const [generation, setGeneration] = useState(1);
   const [bestScore, setBestScore] = useState(0);
   const [showAITrainer, setShowAITrainer] = useState(false);
+  
+  // New state for penalties
+  const [holePenalty, setHolePenalty] = useState(-10);
+  const [closedHolePenalty, setClosedHolePenalty] = useState(-20);
+  const [heightDifferencePenalty, setHeightDifferencePenalty] = useState(-5);
+  const [heightPenalty, setHeightPenalty] = useState(-100);
 
   const handleKeyPress = useCallback((event) => {
     if (gameState.isGameOver || isAIPlaying) return;
@@ -125,12 +131,24 @@ export default function TetrisGame() {
   const shadowY = calculateShadowPosition(gameState);
   const nextTetrominoes = getNextTetrominoes(gameState);
 
+  // Update AI player when penalties change
+  useEffect(() => {
+    aiPlayer.updatePenalties({
+      holePenalty,
+      closedHolePenalty,
+      heightDifferencePenalty,
+      heightPenalty
+    });
+  }, [holePenalty, closedHolePenalty, heightDifferencePenalty, heightPenalty]);
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex">
         <div className="flex flex-col mr-4">
-          <HoldDisplay heldTetromino={gameState.heldTetromino} />
-          <div className="mt-4">
+          <div className="w-32 h-32 mb-4 mx-auto"> {/* Fixed size container for HoldDisplay */}
+            <HoldDisplay heldTetromino={gameState.heldTetromino} />
+          </div>
+          <div className="w-48"> {/* Container for controls, adjust width as needed */}
             <ScoreBoard score={gameState.score} />
             <LinesCleared linesCleared={gameState.linesCleared} />
             <button
@@ -139,6 +157,50 @@ export default function TetrisGame() {
             >
               {isAIPlaying ? "Disable AI" : "Enable AI"}
             </button>
+            <div className="mt-4">
+              <label className="text-sm">Hole Penalty: {holePenalty}</label>
+              <input 
+                type="range" 
+                min="-50" 
+                max="0" 
+                value={holePenalty} 
+                onChange={(e) => setHolePenalty(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="mt-2">
+              <label className="text-sm">Closed Hole Penalty: {closedHolePenalty}</label>
+              <input 
+                type="range" 
+                min="-50" 
+                max="0" 
+                value={closedHolePenalty} 
+                onChange={(e) => setClosedHolePenalty(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="mt-2">
+              <label className="text-sm">Height Difference Penalty: {heightDifferencePenalty}</label>
+              <input 
+                type="range" 
+                min="-20" 
+                max="0" 
+                value={heightDifferencePenalty} 
+                onChange={(e) => setHeightDifferencePenalty(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="mt-2">
+              <label className="text-sm">Height Penalty: {heightPenalty}</label>
+              <input 
+                type="range" 
+                min="-200" 
+                max="0" 
+                value={heightPenalty} 
+                onChange={(e) => setHeightPenalty(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
         <GameBoard gameState={gameState} shadowY={shadowY} />
