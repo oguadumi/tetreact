@@ -35,6 +35,7 @@ export default function TetrisGame() {
 
   const handleKeyPress = useCallback((event) => {
     if (gameState.isGameOver || isAIPlaying) return;
+    
     switch (event.key) {
       case 'ArrowLeft':
         setGameState(prevState => moveTetromino(prevState, { x: -1, y: 0 }));
@@ -55,6 +56,7 @@ export default function TetrisGame() {
         setGameState(prevState => holdTetromino(prevState));
         break;
     }
+    
   }, [gameState.isGameOver, isAIPlaying]);
 
   const restartGame = useCallback(() => {
@@ -86,6 +88,18 @@ export default function TetrisGame() {
     };
   }, [handleKeyPress]);
 
+
+  useEffect(() => {    // Set up the automatic falling mechanism
+    const fallInterval = setInterval(() => {
+      setGameState(prevState => moveTetrominoDown(prevState));
+    }, 1000); // Adjust speed here (1000ms = 1 second fall interval)
+
+    // Clear interval when the component unmounts (important for memory management)
+    return () => clearInterval(fallInterval);
+  }, []);
+
+  
+
   useEffect(() => {
     const gameLoop = setInterval(() => {
       if (!gameState.isGameOver) {
@@ -106,22 +120,23 @@ export default function TetrisGame() {
               return newState;
             });
           }
-        } else {
-          setGameState(prevState => moveTetrominoDown(prevState));
-        }
+        } 
+        
       } else if (isAIPlaying) {
         restartGame();
       }
-    }, isAIPlaying ? 100 : 1000);
+    }, isAIPlaying ? 100 : 1000); //Change to 1000 to slow down ai
 
     return () => clearInterval(gameLoop);
   }, [gameState, isAIPlaying, aiPlayer, restartGame]);
 
   const toggleAIPlay = () => {
     setIsAIPlaying(!isAIPlaying);
-    if (!isAIPlaying) {
-      restartGame();
-    }
+
+    //restarts game when ai is enabled
+    // if (!isAIPlaying) {
+    //   restartGame();
+    // }
   };
 
   const toggleAITrainer = () => {
@@ -145,7 +160,7 @@ export default function TetrisGame() {
     <div className="flex flex-col items-center">
       <div className="flex">
         <div className="flex flex-col mr-4">
-          <div className="w-32 h-32 mb-4 mx-auto"> {/* Fixed size container for HoldDisplay */}
+          <div className="w-32 h-32 mb-4"> {/* Fixed size container for HoldDisplay */}
             <HoldDisplay heldTetromino={gameState.heldTetromino} />
           </div>
           <div className="w-48"> {/* Container for controls, adjust width as needed */}
