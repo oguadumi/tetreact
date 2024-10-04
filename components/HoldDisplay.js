@@ -1,14 +1,5 @@
 import React from 'react';
 
-const COLORS = {
-  I: 'cyan',
-  O: 'yellow',
-  T: 'purple',
-  L: 'orange',
-  J: 'blue',
-  S: 'green',
-  Z: 'red',
-};
 
 export default function HoldDisplay({ heldTetromino }) {
   if (!heldTetromino) {
