@@ -19,6 +19,32 @@ import {
 } from '../lib/tetrisLogic';
 import { AIPlayer } from '../lib/AIPlayer';
 
+
+const ControlsModal = ({ onClose }) => (
+  <div 
+    className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50"
+    onClick={onClose} // Close modal when background is clicked
+  >
+    <div 
+      className="bg-white p-6 rounded shadow-lg relative"
+      onClick={(e) => e.stopPropagation()} // Prevent click from closing when clicking inside the modal
+    >
+      <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+        &times;
+      </button>
+      <h2 className="text-center font-bold mb-2">Controls</h2>
+      <ul className="list-disc list-inside">
+        <li><strong>W</strong> or <strong>Up Arrow</strong>: Rotate</li>
+        <li><strong>A</strong> or <strong>Left Arrow</strong>: Move Left</li>
+        <li><strong>D</strong> or <strong>Right Arrow</strong>: Move Right</li>
+        <li><strong>S</strong> or <strong>Down Arrow</strong>: Move Down</li>
+        <li><strong>Space</strong>: Hard Drop</li>
+        <li><strong>C</strong>: Hold</li>
+      </ul>
+    </div>
+  </div>
+);
+
 export default function TetrisGame() {
   const [gameState, setGameState] = useState(initializeGame());
   const [aiPlayer, setAiPlayer] = useState(new AIPlayer(5, 4, 1, 1));
@@ -26,7 +52,8 @@ export default function TetrisGame() {
   const [generation, setGeneration] = useState(1);
   const [bestScore, setBestScore] = useState(0);
   const [showAITrainer, setShowAITrainer] = useState(false);
-  
+  const [showControls, setShowControls] = useState(false); // New state for controls modal
+
   // New state for penalties
   const [holePenalty, setHolePenalty] = useState(-10);
   const [closedHolePenalty, setClosedHolePenalty] = useState(-20);
@@ -219,8 +246,18 @@ export default function TetrisGame() {
           </div>
         </div>
         <GameBoard gameState={gameState} shadowY={shadowY} />
-        <NextDisplay nextPieces={nextTetrominoes} />
+        <div className="flex flex-col items-center">
+          <NextDisplay nextPieces={nextTetrominoes} />
+          <button
+            onClick={() => setShowControls(true)}
+            className="mt-4 p-2 bg-blue-500 text-white rounded ml-4"
+          >
+            Show Controls
+          </button>
+        </div>
       </div>
+
+      {showControls && <ControlsModal onClose={() => setShowControls(false)} />}
 
       <button
         onClick={toggleAITrainer}
