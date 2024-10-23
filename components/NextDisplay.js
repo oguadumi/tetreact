@@ -1,10 +1,10 @@
 import React from 'react';
 
-const NextDisplay = ({ nextPieces = [] }) => { // Default to an empty array
-  console.log('Next Pieces:', nextPieces); // Log next pieces
+const NextDisplay = ({ nextPieces = [] }) => { 
+  console.log('Next Pieces:', nextPieces); 
 
-  const pieceSize = 50; // Size of each piece
-  const containerHeight = pieceSize * nextPieces.slice(0, 5).length + 20; // Calculate container height
+  const pieceSize = 50; 
+  const containerHeight = pieceSize * nextPieces.slice(0, 5).length + 20; 
 
   return (
     <div className="next-display p-2 border-2 border-gray-300 rounded" style={{ height: containerHeight }}>
@@ -12,7 +12,7 @@ const NextDisplay = ({ nextPieces = [] }) => { // Default to an empty array
       {nextPieces.slice(0, 5).map((piece, index) => (
         <div key={index} className="next-piece mb-2">
           <img
-            src={`/${piece.type}_.png`} // Ensure the correct property is used
+            src={`/${piece.type}_.png`} 
             alt={`Next piece: ${piece.type}`}
             width={40} // Increased width
             height={40} // Increased height

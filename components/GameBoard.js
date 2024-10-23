@@ -14,13 +14,10 @@ const COLORS = {
 export default function GameBoard({ gameState }) {
   const { board, currentTetromino, currentPosition } = gameState;
 
-  // Calculate the shadow position
   const shadowY = calculateShadowPosition(gameState);
 
-  // Create a copy of the board to overlay the current Tetromino and shadow
   const displayBoard = board.map(row => [...row]);
 
-  // Overlay the shadow onto the board (gray or semi-transparent)
   currentTetromino.shape.forEach((row, y) => {
     row.forEach((cell, x) => {
       if (cell) {
@@ -33,7 +30,6 @@ export default function GameBoard({ gameState }) {
     });
   });
 
-  // Overlay the current Tetromino onto the board
   currentTetromino.shape.forEach((row, y) => {
     row.forEach((cell, x) => {
       if (cell) {

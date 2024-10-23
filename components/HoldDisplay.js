@@ -17,7 +17,6 @@ export default function HoldDisplay({ heldTetromino }) {
     <div className="mr-4 p-2 h-32 border-2 border-gray-300 rounded">
       <h2 className="text-center font-bold mb-2">Hold</h2>
       
-      {/* Display the tetromino image */}
       <div className="flex justify-center items-center h-full">
         <img 
           src={`/${type}_.png`} 

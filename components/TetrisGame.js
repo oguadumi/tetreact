@@ -88,21 +88,17 @@ export default function TetrisGame() {
 
   const restartGame = useCallback(() => {
     if (isAIPlaying) {
-      // Update AI fitness before restarting
       aiPlayer.updateFitness(gameState.score, gameState.linesCleared);
       
-      // Train AI here (simplified version)
+      // Train AI here (simple version)
       aiPlayer.mutate(0.1); // 10% mutation rate
       
-      // Update best score
       if (gameState.score > bestScore) {
         setBestScore(gameState.score);
       }
       
-      // Increment generation
       setGeneration(prev => prev + 1);
       
-      // Reset AI player for next game
       aiPlayer.reset();
     }
     setGameState(initializeGame());
@@ -116,12 +112,11 @@ export default function TetrisGame() {
   }, [handleKeyPress]);
 
 
-  useEffect(() => {    // Set up the automatic falling mechanism
+  useEffect(() => {    // autofall stuff
     const fallInterval = setInterval(() => {
       setGameState(prevState => moveTetrominoDown(prevState));
     }, 1000); // Adjust speed here (1000ms = 1 second fall interval)
 
-    // Clear interval when the component unmounts (important for memory management)
     return () => clearInterval(fallInterval);
   }, []);
 
@@ -173,7 +168,6 @@ export default function TetrisGame() {
   const shadowY = calculateShadowPosition(gameState);
   const nextTetrominoes = getNextTetrominoes(gameState);
 
-  // Update AI player when penalties change
   useEffect(() => {
     aiPlayer.updatePenalties({
       holePenalty,
@@ -187,10 +181,10 @@ export default function TetrisGame() {
     <div className="flex flex-col items-center">
       <div className="flex">
         <div className="flex flex-col mr-4">
-          <div className="w-32 h-32 mb-4"> {/* Fixed size container for HoldDisplay */}
+          <div className="w-32 h-32 mb-4 "> 
             <HoldDisplay heldTetromino={gameState.heldTetromino} />
           </div>
-          <div className="w-48"> {/* Container for controls, adjust width as needed */}
+          <div className="w-48"> 
             <ScoreBoard score={gameState.score} />
             <LinesCleared linesCleared={gameState.linesCleared} />
             <button
@@ -259,14 +253,14 @@ export default function TetrisGame() {
 
       {showControls && <ControlsModal onClose={() => setShowControls(false)} />}
 
-      <button
+      {/* <button
         onClick={toggleAITrainer}
         className="mt-4 p-2 bg-purple-500 text-white rounded"
       >
         {showAITrainer ? "Hide AI Trainer" : "Show AI Trainer"}
       </button>
 
-      {showAITrainer && <AITrainer />}
+      {showAITrainer && <AITrainer />} */}
 
       {gameState.isGameOver && !isAIPlaying && (
         <div className="text-center mt-4">
